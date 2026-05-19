@@ -1,7 +1,76 @@
 ---
 title: "Lab Solutions"
-format: html
-editor: visual
+author: "Bernado Bernal, Tyler Chung, Marco DiPierro"
+format:
+  html: 
+    embed-resources: true
+    code-tools: true
+    toc: true
+    html-table-processing: none
+editor: source
+execute: 
+  error: true
+  echo: true
+  message: false
+  warning: false
 ---
+## Setup
+```{r}
+#load in libraries
+library(tidyverse)
+library(knitr)
+```
 
+```{r}
+#load in imdb-movies-dataset.csv
+movies <- read_csv("imdb-movies-dataset.csv")
+
+```
+
+## Functions and Dataframes
+
+The goal of this lab is to get a solid handle on how to develop functions in hand with a dataframe. As doing so can greatly decrease the amount of repeated code needed to get similar output from looking through a dataframe multiple times at differnt points of time. Think about how you might have a dataframe of candy and you end with a table of chocolate candies with selected information, only to find out you have to make a similar table with hard candies instead. To make the same table twice but with one difference here would be a lot of code. Luckily with a function that can be reduced to a single line in both cases along with the code to make the function.
+
+The dataset we are using for this lab comes from kaggle, <https://www.kaggle.com/datasets/amanbarthwal/imdb-movies-data>. The datset has various information on 10,000 movies collected from *IMDB*. As such you can expect to find title, genre, and rating information from this dataset along with some other information. Visit the link to get the whole data dictionary in order to find out what each column means, we will be using version two of the data.
+
+## Simple Functions
+
+Lets start off making some simple functions
+
+**Write a function to filter a table by a specific actor or genre**
+
+Looking at the movies dataset it could be seen that both genre and cast contain a list of comma separated values rather than only containing one value. For this function if we are given a specific actor or genre we should return the same dataframe but with only the specified value given. If given Horror as a genre then we should only return rows that contain Horror as a genre and mutate them to only contain Horror as a genre rather than something like "Horror, Comedy".
+
+To help guide you in making this function you are taking 3 inputs
+
+1. A dataframe
+2. A given column Actor or Genre
+3. A character value 
+
+:::{.callout-tip}
+## Working with dplyr in functions
+
+Remember that when in a function it would be useful to use `rlang` in order to get tidy evaluation for a column passed to a function.
+
+:::
+
+```{r}
+#code your function
+single_actor_genre <- function(df, col, str) {
+  df |> 
+    filter(str_detect(string = {{col}},
+                      pattern = str)) |> 
+    mutate({{col}} := str_extract(string = {{col}},
+                                 pattern = str))
+}
+```
+
+Check you function
+```{r}
+#will likely have to change function name and input around to see if your code worked
+single_actor_genre(movies, Genre, "Horror") |> 
+  select(Title, Genre) |> 
+  head(5) |> 
+  kable()
+```
 
