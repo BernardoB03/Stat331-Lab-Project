@@ -43,20 +43,21 @@ Using one dplyr pipeline, clean the movies dataset by:
 
 Removing any rows where Title, Genre, or Rating are missing
 Removing any duplicate movies based on Title
-Converting Rating to a numeric variable
 Converting Year to an integer variable
 Only keeping the columns we will use — Title, Year, Genre, Rating, Cast, Director, and Metascore
 
 Assign your cleaned data to a new variable called movies_clean use this data going forward.
 ```{r}
 movies_clean <- movies |>
-  filter(!is.na(Title),
-         !is.na(Genre),
-         !is.na(Rating)) |>
+  filter(
+    !is.na(Title),
+    !is.na(Genre),
+    !is.na(Rating)
+  ) |>
   distinct(Title, .keep_all = TRUE) |>
-  mutate(Rating = as.numeric(Rating),
-         Year = as.integer(Year)) |>
-  select(Title, Year, Genre, Rating, Cast, Director, Metascore)
+  rename(Duration = "Duration (min)") |>
+  select(Title, Year, Certificate, Duration, Genre, Rating,
+    Cast, Director, Metascore, Votes)
 ```
 
 **Write a function to filter a table by a specific actor or genre**
