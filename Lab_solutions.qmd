@@ -37,6 +37,28 @@ movies <- read_csv("imdb-movies-dataset.csv")
 
 Lets start off by making a simple function.
 
+##Data Cleaning
+Before we can begin working with this dataset, we need to clean it up. Looking at the movies dataset you may notice some missing values, duplicate entries, and columns that won't be useful for our analysis.
+Using one dplyr pipeline, clean the movies dataset by:
+
+Removing any rows where Title, Genre, or Rating are missing
+Removing any duplicate movies based on Title
+Converting Rating to a numeric variable
+Converting Year to an integer variable
+Only keeping the columns we will use — Title, Year, Genre, Rating, Cast, Director, and Metascore
+
+Assign your cleaned data to a new variable called movies_clean use this data going forward.
+```{r}
+movies_clean <- movies |>
+  filter(!is.na(Title),
+         !is.na(Genre),
+         !is.na(Rating)) |>
+  distinct(Title, .keep_all = TRUE) |>
+  mutate(Rating = as.numeric(Rating),
+         Year = as.integer(Year)) |>
+  select(Title, Year, Genre, Rating, Cast, Director, Metascore)
+```
+
 **Write a function to filter a table by a specific actor or genre**
 
 Looking at the movies dataset it could be seen that both genre and cast contain a list of comma separated values, rather than only containing one value. For this function if we are given a specific actor or genre we should return the rows that contain that value, but with only the specified value given in the respective column. If given Horror as a genre then we should only return rows that contain Horror as a genre and mutate them to only contain Horror as a genre rather than something like "Horror, Comedy".
