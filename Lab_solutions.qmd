@@ -91,7 +91,7 @@ single_actor_genre <- function(df, col, str) {
 }
 ```
 
-Check you function
+Check your function
 ```{r}
 #will likely have to change function name and input here to see if your code worked
 single_actor_genre(movies_clean, Genre, "Horror") |> 
@@ -101,6 +101,26 @@ single_actor_genre(movies_clean, Genre, "Horror") |>
 ```
 
 **3. Adding input validation to our function**
+```{r}
+
+single_actor_genre <- function(df, col, str) {
+  stopifnot("`df` must be a dataframe." = is.data.frame(df))
+  stopifnot("`str` must be a character string." = is.character(str))
+  
+  col_name <- rlang::as_name(rlang::ensym(col))
+
+  stopifnot(
+    "`col` must be a column in df." = col_name %in% names(df)
+  )
+  
+  df |> 
+    filter(str_detect(string = {{col}},
+                      pattern = str)) |> 
+    mutate({{col}} := str_extract(string = {{col}},
+                                 pattern = str))
+}
+
+```
 
 ## References
 
