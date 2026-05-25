@@ -122,6 +122,63 @@ single_actor_genre <- function(df, col, str) {
 
 ```
 
+## More complex functions
+
+Now that we have added input validation to our simple function we should be able to make a more complex function with our previous function as a piece of it. 
+
+**4.Create a function that outputs yearly information related to a genre or actor**
+
+In order to stimulate a more complex function we will just be creating a longer dplyr pipeline that handles multiple input along with setting default values if input value isn't provided.
+
+The goal of this function is simple, given a genre or actor we want to collapse information into a single year. For example if there where 6 horror movies in 1966 we simply want to take the average or sum of some values into a single year. Here is a list of input variables and output columns to help you out in creating this function
+
+**input**  
+
+1. a dataframe
+2. a column that's either Genre or Cast
+3. a character value that relates to genre or cast
+4. a good rating value that should default to 7 if nothing is passed to it
+5. an average rating value that should default to 4 if nothing is passed to it
+
+Output columns
+
+1. year: should not have any repeated years
+2. avg_rating: average rating from that year
+3. total_votes: total votes from that year
+4. quality: contains 3 possible character values
+    - good: if avg_rating was above the good rating value
+    - average: if avg_rating was above average rating value but below the good rating value
+    - bad: if avg_rating is below the average rating value
+  
+Remember to add input validation here as its good practice and stops any unexpected error before they happen.
+
+```{r}
+
+yearly_info <- function(df, col, str, good_rating = 7, average_rating = 4) {
+  #input validation
+  stopifnot("`df` must be a dataframe." = is.data.frame(df))
+  stopifnot("`str` must be a character string." = is.character(str))
+  stopifnot("`col` must be `Genre` or `Cast`." = str_detect(string = deparse(substitute(col)),pattern = "Genre|Cast"))
+  
+  #function
+  df |> 
+  single_actor_genre({{col}}, str) |> 
+  group_by(Year) |> 
+  summarise(avg_rating = mean(Rating),
+            total_users = sum(Votes)) |> 
+  mutate(quality = case_when(avg_rating > good_rating ~ "good",
+                             avg_rating > average_rating ~ "average",
+                             .default = "bad"))
+}
+
+```
+
+**Test your function here**
+```{r}
+yearly_info(movies_clean, Genre, "Horror")
+```
+
+
 ## References
 
 Markdown syntax guide used for links and list  
@@ -129,3 +186,6 @@ Markdown syntax guide used for links and list
 
 Quarto guide in including callout blocks  
 <https://quarto.org/docs/authoring/callouts.html>
+
+Getting a variable name as a character  
+<https://stackoverflow.com/questions/14577412/how-to-convert-variable-object-name-into-string>
