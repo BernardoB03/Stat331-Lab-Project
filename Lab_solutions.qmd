@@ -61,7 +61,7 @@ movies_clean <- movies |>
 
 ## Simple Functions
 
-Lets start off by making a simple function.
+Lets get into functions with a simple one
 
 **2. Write a function to filter a table by a specific actor or genre**
 
@@ -124,13 +124,11 @@ single_actor_genre <- function(df, col, str) {
 
 ## More complex functions
 
-Now that we have added input validation to our simple function we should be able to make a more complex function with our previous function as a piece of it. 
+Now that we have added input validation to our simple function we should be able to take a step up in making a function and add some default values to a function. Which just means that if a value isn't passed it will default to a preset value.
 
 **4.Create a function that outputs yearly information related to a genre or actor**
 
-In order to stimulate a more complex function we will just be creating a longer dplyr pipeline that handles multiple input along with setting default values if input value isn't provided.
-
-The goal of this function is simple, given a genre or actor we want to collapse information into a single year. For example if there where 6 horror movies in 1966 we simply want to take the average or sum of some values into a single year. Here is a list of input variables and output columns to help you out in creating this function
+The goal of this function is simple, given a genre or actor we want to collapse information into a single year. For example if there where 6 horror movies in 1966 we simply want to take the average or sum of some values into a single year. Here is a list of input variables and output columns to help you out in creating this function.
 
 **input**  
 
@@ -142,10 +140,11 @@ The goal of this function is simple, given a genre or actor we want to collapse 
 
 Output columns
 
-1. year: should not have any repeated years
-2. avg_rating: average rating from that year
-3. total_votes: total votes from that year
-4. quality: contains 3 possible character values
+1. column passed 
+2. year: should not have any repeated years
+3. avg_rating: average rating from that year
+4. total_votes: total votes from that year
+5. quality: contains 3 possible character values
     - good: if avg_rating was above the good rating value
     - average: if avg_rating was above average rating value but below the good rating value
     - bad: if avg_rating is below the average rating value
@@ -163,9 +162,9 @@ yearly_info <- function(df, col, str, good_rating = 7, average_rating = 4) {
   #function
   df |> 
   single_actor_genre({{col}}, str) |> 
-  group_by(Year) |> 
+  group_by({{col}}, Year) |> 
   summarise(avg_rating = mean(Rating),
-            total_users = sum(Votes)) |> 
+            total_votes = sum(Votes)) |> 
   mutate(quality = case_when(avg_rating > good_rating ~ "good",
                              avg_rating > average_rating ~ "average",
                              .default = "bad"))
@@ -175,9 +174,36 @@ yearly_info <- function(df, col, str, good_rating = 7, average_rating = 4) {
 
 **Test your function here**
 ```{r}
-yearly_info(movies_clean, Genre, "Horror")
+#mess around with this code to make sure you getting error when providing things that arnt expected
+yearly_info(movies_clean, Genre, "Horror") |> 
+  head(5) |> 
+  kable()
 ```
 
+## The power of functions
+
+As you might have noticed when writing your more complex function the true beauty of functions is how little you have to repeat code and how they just shorten everything. To get a more solid appreciation of them we will now use our more complex function in getting some fun data
+
+**5. Make a table with yearly information on 2 or more genres or actors**
+
+Using the more complex function you made, save a dataframe that contains yearly information on 2 or more genres or actors but you must stick to your chosen category. As in only 2 actors if you pick actors and not 1 actor or one genre. It should also contain the title of the highest rated movie of that year, its duration, its rating and votes.You can also drop cast or genre depending on what you pick to look into. For example if you pick 2 actors then you can drop genre, but if you pick 2 genres you can drop cast.
+
+:::{.callout-tip}
+## Expanding rows in a dataframe
+
+It would be useful to look into functions that could help you **bind** rows together or a **map function that returns a dataframe**
+
+:::
+
+```{r}
+genre <- map_dfr(c("Horror", "Comedy", "Action"),~ yearly_info(movies_clean, Genre, .x)) |> 
+  inner_join(movies_clean, by = c("Genre", "Year")) |> 
+  group_by(Genre, Year) |> 
+  slice_max(Rating, n = 1, with_ties = FALSE) |> 
+  select(-Metascore, -Director, -Certificate, -Cast) |> 
+  ungroup()
+```
+Take a moment to think about how many more lines of code would be needed if we didn't already have functions to handle a lot of the busy work and appreciate your work so far.  
 
 ## References
 
@@ -189,3 +215,7 @@ Quarto guide in including callout blocks
 
 Getting a variable name as a character  
 <https://stackoverflow.com/questions/14577412/how-to-convert-variable-object-name-into-string>
+
+Function that returns a dataframe when mapping  
+<https://purrr.tidyverse.org/reference/map_dfr.html>
+
