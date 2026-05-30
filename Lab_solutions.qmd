@@ -205,6 +205,58 @@ genre <- map_dfr(c("Horror", "Comedy", "Action"),~ yearly_info(movies_clean, Gen
 ```
 Take a moment to think about how many more lines of code would be needed if we didn't already have functions to handle a lot of the busy work and appreciate your work so far.  
 
+## Presenting Data Nicely
+
+**6. Create a nicer looking table for the 3 genres**
+
+Using `genre` from question 5, create a clean readable table with `select()`, `rename()`, `arrange()`, `mutate()`, and `kable()`. Clean up the column names, round numeric values, and arrange by genre and year.
+
+```{r}
+genre |>
+  select(Genre, Year, avg_rating, total_votes, quality, Title, Duration, Rating) |>
+  rename(
+    `Avg Rating`     = avg_rating,
+    `Total Votes`    = total_votes,
+    Quality          = quality,
+    `Best Movie`     = Title,
+    `Duration (min)` = Duration,
+    `Movie Rating`   = Rating
+  ) |>
+  arrange(Genre, Year) |>
+  mutate(`Avg Rating` = round(`Avg Rating`, 2)) |>
+  kable(caption = "Yearly Film Performance by Genre: Horror, Comedy, and Action")
+```
+
+---
+
+**7. Create a graph based on the 3 genres**
+
+Using `genre`, create a graph with `ggplot2` that shows how the average yearly rating for each genre has changed over time. Use `geom_line()` and `geom_point()` to show the trend and `color` to distinguish the genres. Include clear axis labels and a title.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+genre |>
+  select(Genre, Year, avg_rating, quality) |>
+  distinct() |>
+  ggplot(aes(x = Year, y = avg_rating, color = Genre, group = Genre)) +
+  geom_line() +
+  geom_point(aes(shape = quality), size = 3) +
+  scale_shape_manual(
+    name   = "Quality",
+    values = c("good" = 16, "average" = 17, "bad" = 4)
+  ) +
+  scale_y_continuous(limits = c(0, 10), breaks = seq(0, 10, 2)) +
+  labs(
+    title   = "Average IMDB Rating by Year",
+    x       = "Year",
+    y       = "Average Rating",
+    color   = "Genre",
+    caption = "Source: IMDB Movies Dataset (Kaggle)"
+  ) +
+  theme_bw()
+```
+
 ## References
 
 Markdown syntax guide used for links and list  
