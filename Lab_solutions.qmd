@@ -124,32 +124,27 @@ single_actor_genre <- function(df, col, str) {
 
 ## More complex functions
 
-Now that we have added input validation to our simple function we should be able to take a step up in making a function and add some default values to a function. Which just means that if a value isn't passed it will default to a preset value.
+A big part of functions is that they actually use other functions to help out, this is often called a helper function. Since we already made a function to help us in filtering the table out we should make use of it as a helper function to make a more complex function.
+
+While we are at it we should also add some default values to a function. Which just means that if a value isn't passed it will default to a preset value.
 
 **4.Create a function that outputs yearly information related to a genre or actor**
 
-The goal of this function is simple, given a genre or actor we want to collapse information into a single year. For example if there where 6 horror movies in 1966 we simply want to take the average or sum of some values into a single year. Here is a list of input variables and output columns to help you out in creating this function.
+The function we will now be making will collapse information that is filtered out from the previous function into rows based on year. For example if the previous function was used to filter horror genre movies, and it returned us 6 movies from 2011 we will want collapse the information into one row of 2011. To do this you would want to take the average rating and sum of votes.
 
-**input**  
+While at it we should also introduce some default values to say if that year had a good, average, or bad quality of movies. So for this part if a year had an average rating above a 7 it should be considered good. Anything between a 4 and 7, including the 7 should be average, and anything below that should be bad. Although a user should be able to change those 7 and 4 values if they want
 
-1. a dataframe
-2. a column that's either Genre or Cast
-3. a character value that relates to genre or cast
-4. a good rating value that should default to 7 if nothing is passed to it
-5. an average rating value that should default to 4 if nothing is passed to it
+Here is an example of what the output should look like
 
-Output columns
+| Genre | Year | avg_rating | total_votes| quality |
+|:-----:|:----:|:----------:|:----------:|:-------:|
+| Horror| 2011 |    7.1     | 104644     | good    |
+| Horror| 2010 |    6.2     | 529576     | average |
+| Horror| 2009 |    4       | 92455      | bad     |
 
-1. column passed 
-2. year: should not have any repeated years
-3. avg_rating: average rating from that year
-4. total_votes: total votes from that year
-5. quality: contains 3 possible character values
-    - good: if avg_rating was above the good rating value
-    - average: if avg_rating was above average rating value but below the good rating value
-    - bad: if avg_rating is below the average rating value
-  
-Remember to add input validation here as its good practice and stops any unexpected error before they happen.
+: possible output
+
+The input of this function should be straightforward, since your using a helper function you need its input, you don't want someone using the last function and then this one, they should be able to use the last function from within this function. You also cant forget about those default values that can be changed too. 
 
 ```{r}
 
@@ -184,25 +179,26 @@ yearly_info(movies_clean, Genre, "Horror") |>
 
 As you might have noticed when writing your more complex function the true beauty of functions is how little you have to repeat code and how they just shorten everything. To get a more solid appreciation of them we will now use our more complex function in getting some fun data
 
-**5. Make a table with yearly information on 2 or more genres or actors**
+**5. Make a table with yearly information on 3 genres**
 
-Using the more complex function you made, save a dataframe that contains yearly information on 2 or more genres or actors but you must stick to your chosen category. As in only 2 actors if you pick actors and not 1 actor or one genre. It should also contain the title of the highest rated movie of that year, its duration, its rating and votes.You can also drop cast or genre depending on what you pick to look into. For example if you pick 2 actors then you can drop genre, but if you pick 2 genres you can drop cast.
+Using the more complex function you made, save a dataframe that contains yearly information on 3 genres. It should also contain the title of the highest rated movie of that year for each genre, its duration, its rating and votes.
 
 :::{.callout-tip}
 ## Expanding rows in a dataframe
 
-It would be useful to look into functions that could help you **bind** rows together or a **map function that returns a dataframe**
+It would be useful to look into functions that could help you **bind** rows together or something like `map_dfr`
 
 :::
 
 ```{r}
-genre <- map_dfr(c("Horror", "Comedy", "Action"),~ yearly_info(movies_clean, Genre, .x)) |> 
+three_genres <- map_dfr(c("Horror", "Comedy", "Action"),~ yearly_info(movies_clean, Genre, .x)) |> 
   inner_join(movies_clean, by = c("Genre", "Year")) |> 
   group_by(Genre, Year) |> 
   slice_max(Rating, n = 1, with_ties = FALSE) |> 
   select(-Metascore, -Director, -Certificate, -Cast) |> 
   ungroup()
 ```
+
 Take a moment to think about how many more lines of code would be needed if we didn't already have functions to handle a lot of the busy work and appreciate your work so far.  
 
 ## Presenting Data Nicely
@@ -212,7 +208,7 @@ Take a moment to think about how many more lines of code would be needed if we d
 Using `genre` from question 5, create a clean readable table with `select()`, `rename()`, `arrange()`, `mutate()`, and `kable()`. Clean up the column names, round numeric values, and arrange by genre and year.
 
 ```{r}
-genre |>
+three_genres |>
   select(Genre, Year, avg_rating, total_votes, quality, Title, Duration, Rating) |>
   rename(
     `Avg Rating`     = avg_rating,
