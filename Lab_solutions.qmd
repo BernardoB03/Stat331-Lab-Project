@@ -144,7 +144,7 @@ Here is an example of what the output should look like
 
 : possible output
 
-The input of this function should be straightforward, since your using a helper function you need its input, you don't want someone using the last function and then this one, they should be able to use the last function from within this function. You also cant forget about those default values that can be changed too. 
+The input of this function should be straightforward, since your using a helper function you need its input to be included in this function as well. Then you are just adding the default variables that where mentioned before.
 
 ```{r}
 
