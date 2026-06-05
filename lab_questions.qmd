@@ -118,36 +118,29 @@ To check whether a `col` argument (passed with `{{ }}`) is actually a column nam
 
 ---
 
-## More Complex Functions
+## More complex functions
 
-**4. Create a function that summarizes yearly performance for a genre or actor**
+A big part of functions is that they actually use other functions to help out, this is often called a helper function. Since we already made a function to help us in filtering the table out we should make use of it as a helper function to make a more complex function.
 
-Using `single_actor_genre` as a helper function, write a new function called `yearly_info` that collapses the filtered results into one row per year. For each year, compute:
+While we are at it we should also add some default values to a function. Which just means that if a value isn't passed it will default to a preset value.
 
-- `avg_rating`: the mean `Rating` across all movies that year
-- `total_votes`: the total `Votes` across all movies that year
-- `quality`: a label based on `avg_rating`
-  - `"good"` if average rating is **above** `good_rating` (default: `7`)
-  - `"average"` if average rating is **above** `average_rating` but at or below `good_rating` (default: `4`)
-  - `"bad"` otherwise
+**4.Create a function that outputs yearly information related to a genre or actor**
 
-The `good_rating` and `average_rating` thresholds should be **optional arguments with defaults**, so the user can override them if needed.
+The function we will now be making will collapse information that is filtered out from the previous function into rows based on year. For example if the previous function was used to filter horror genre movies, and it returned us 6 movies from 2011 we will want collapse the information into one row of 2011. To do this you would want to take the average rating and sum of votes.
 
-Here is an example of the expected output structure (values are illustrative):
+While at it we should also introduce some default values to say if that year had a good, average, or bad quality of movies. So for this part if a year had an average rating above a 7 it should be considered good. Anything between a 4 and 7, including the 7 should be average, and anything below that should be bad. Although a user should be able to change those 7 and 4 values if they want
 
-| Genre  | Year | avg_rating | total_votes | quality |
-|:------:|:----:|:----------:|:-----------:|:-------:|
-| Horror | 2011 | 7.1        | 104644      | good    |
-| Horror | 2010 | 6.2        | 529576      | average |
-| Horror | 2009 | 4.0        | 92455       | bad     |
+Here is an example of what the output should look like
 
-Your function should accept the same first three arguments as `single_actor_genre` (since you'll be calling it internally), plus the two threshold defaults.
+| Genre | Year | avg_rating | total_votes| quality |
+|:-----:|:----:|:----------:|:----------:|:-------:|
+| Horror| 2011 |    7.1     | 104644     | good    |
+| Horror| 2010 |    6.2     | 529576     | average |
+| Horror| 2009 |    4       | 92455      | bad     |
 
-:::{.callout-tip}
-## Input validation for `col`
+: possible output
 
-For this function, `col` should only accept `Genre` or `Cast`. You can use `deparse(substitute(col))` to extract the column name as a string for validation purposes.
-:::
+The input of this function should be straightforward, since your using a helper function you need its input to be included in this function as well. Then you are just adding the default variables that where mentioned before.
 
 ```{r}
 # your function here
@@ -163,21 +156,19 @@ yearly_info(movies_clean, Genre, "Horror") |>
 
 ---
 
-## The Power of Functions
+## The power of functions
 
-**5. Build a combined dataset for three genres**
+As you might have noticed when writing your more complex function the true beauty of functions is how little you have to repeat code and how they just shorten everything. To get a more solid appreciation of them we will now use our more complex function in getting some fun data
 
-Using `yearly_info`, create a single dataframe that contains yearly summary information for **Horror**, **Comedy**, and **Action** all together. You can name this dataframe whatever you like — just make sure you use that same name consistently in questions 6 and 7.
+**5. Make a table with yearly information on 3 genres**
 
-In addition to the columns produced by `yearly_info`, also include for each year-genre combination:
-
-- The `Title` of the highest-rated movie that year (break ties by keeping just one)
-- That movie's `Duration` and `Rating`
+Using the more complex function you made, save a dataframe that contains yearly information on 3 genres. It should also contain the title of the highest rated movie of that year for each genre, its duration, its rating and votes.
 
 :::{.callout-tip}
-## Stacking results for multiple inputs
+## Expanding rows in a dataframe
 
-Consider how you might apply `yearly_info` across a vector of genre names and combine the results into one dataframe. Functions like `map_dfr()` or `bind_rows()` may be useful.
+It would be useful to look into functions that could help you **bind** rows together or something like `map_dfr`
+
 :::
 
 ```{r}
