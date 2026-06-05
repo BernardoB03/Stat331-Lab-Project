@@ -214,3 +214,29 @@ Your plot should:
 ```{r}
 # your code here
 ```
+
+## Statistical Analysis
+
+**8a. Using the same `genre` dataset, let's see whether there's a correlation between a movie's duration and its rating. Create a scatterplot of `Duration` vs `Rating` and include a linear regression line. Describe the scatterplot.**
+
+:::{.callout-tip}
+Don't worry about labels for this question.
+:::
+
+```{r}
+
+```
+
+**8b. Fit a simple linear regression model predicting Rating by Duration. Report the R-squared value and give a brief interpretation.**
+
+```{r}
+
+```
+
+
+**8c. Now nest your regression by genre, and report which genre had the highest R-squared. What are possible limitations of the model we used? (hint: look at the number of rows for each genre!)**
+
+```{r}
+
+```
+
