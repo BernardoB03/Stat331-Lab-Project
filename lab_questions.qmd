@@ -162,7 +162,7 @@ As you might have noticed when writing your more complex function the true beaut
 
 **5. Make a table with yearly information on 3 genres**
 
-Using the more complex function you made, save a dataframe that contains yearly information on 3 genres. It should also contain the title of the highest rated movie of that year for each genre, its duration, its rating and votes.
+Using the more complex function you made, save a dataframe that contains yearly information on the 3 genres. It should also contain the title of the highest rated movie of that year for each genre, its duration, its rating and votes.
 
 :::{.callout-tip}
 ## Expanding rows in a dataframe
