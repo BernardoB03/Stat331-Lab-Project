@@ -237,11 +237,6 @@ three_genres |>
   ggplot(aes(x = Year, y = avg_rating, color = Genre, group = Genre)) +
   geom_line() +
   geom_point(aes(shape = quality), size = 3) +
-  scale_shape_manual(
-    name   = "Quality",
-    values = c("good" = 16, "average" = 17, "bad" = 4)
-  ) +
-  scale_y_continuous(limits = c(0, 10), breaks = seq(0, 10, 2)) +
   labs(
     title   = "Average IMDB Rating by Year and Genre",
     x       = "Year",
