@@ -1,0 +1,225 @@
+---
+title: "Lab 9: Functions and Dataframes"
+format:
+  html: 
+    embed-resources: true
+    code-tools: true
+    toc: true
+    html-table-processing: none
+editor: source
+execute: 
+  error: true
+  echo: true
+  message: false
+  warning: false
+---
+
+## Functions and Dataframes
+
+The goal of this lab is to develop a solid handle on how to build functions that work alongside a dataframe. Functions are powerful because they eliminate repeated code. Imagine you have a dataframe of candy and you need a table showing only the chocolate candies — then your boss asks for the same table but for hard candies instead. Without a function, you'd copy and paste nearly identical code twice. With a function, each table is just a single line of code.
+
+The dataset we are using comes from [Kaggle](https://www.kaggle.com/datasets/amanbarthwal/imdb-movies-data). It contains information on 10,000 movies collected from *IMDB*, including title, genre, rating, cast, and more. Visit the link for the full data dictionary. We will be using version two of the data.
+
+## Setup
+
+```{r}
+library(tidyverse)
+library(knitr)
+```
+
+```{r}
+movies <- read_csv("imdb-movies-dataset.csv")
+```
+
+---
+
+## Data Cleaning
+
+**1. Clean the dataset before analysis**
+
+Before we can begin working with this dataset, we need to tidy it up. The raw data contains missing values, duplicate entries, and columns we won't need.
+
+Using a single `dplyr` pipeline, create a cleaned dataset called `movies_clean` by:
+
+- Removing any rows where `Title`, `Genre`, or `Rating` are missing
+- Removing duplicate movies, keeping only the first occurrence of each `Title`
+- Renaming `Duration (min)` to `Duration` (the space and parentheses will cause issues later)
+- Keeping only the columns: `Title`, `Year`, `Certificate`, `Duration`, `Genre`, `Rating`, `Cast`, `Director`, `Metascore`, `Votes`
+
+Use `movies_clean` for all questions going forward.
+
+```{r}
+# your code here
+```
+
+---
+
+## Simple Functions
+
+**2. Write a function to filter a table by a specific actor or genre**
+
+Both the `Genre` and `Cast` columns contain comma-separated lists of values (e.g., `"Horror, Comedy"` or `"Tom Hanks, Robin Wright"`). Write a function called `single_actor_genre` that:
+
+1. Filters the dataframe to only rows where a given column **contains** a specified string
+2. Mutates that column so it shows **only** the matched value (not the full comma-separated list)
+
+For example, passing `"Horror"` as the genre should return rows that include Horror as a genre, with the `Genre` column showing only `"Horror"`.
+
+Your function should accept three arguments:
+
+1. `df` — a dataframe
+2. `col` — the column to search (e.g., `Genre` or `Cast`)
+3. `str` — the character value to search for
+
+:::{.callout-tip}
+## Working with dplyr inside functions
+
+When passing a column name into a function, use `{{ col }}` (curly-curly) for `dplyr` verbs. This is part of `rlang`'s tidy evaluation system.
+:::
+
+```{r}
+# your function here
+```
+
+Check your function:
+
+```{r}
+single_actor_genre(movies_clean, Genre, "Horror") |> 
+  select(Title, Genre) |> 
+  head(5) |> 
+  kable()
+```
+
+---
+
+**3. Add input validation to your function**
+
+Rewrite `single_actor_genre` to include checks that guard against bad inputs. Specifically, your function should stop with a clear error message if:
+
+- `df` is not a dataframe
+- `str` is not a character string
+- The column passed as `col` does not exist in `df`
+
+:::{.callout-tip}
+## Stopping with a message
+
+`stopifnot()` is a convenient way to validate inputs. You can supply a named argument where the name becomes the error message:
+
+```r
+stopifnot("my message" = some_condition)
+```
+
+To check whether a `col` argument (passed with `{{ }}`) is actually a column name in `df`, you may find `rlang::as_name()` and `rlang::ensym()` helpful for extracting the column name as a string.
+:::
+
+```{r}
+# updated function with validation
+```
+
+---
+
+## More Complex Functions
+
+**4. Create a function that summarizes yearly performance for a genre or actor**
+
+Using `single_actor_genre` as a helper function, write a new function called `yearly_info` that collapses the filtered results into one row per year. For each year, compute:
+
+- `avg_rating`: the mean `Rating` across all movies that year
+- `total_votes`: the total `Votes` across all movies that year
+- `quality`: a label based on `avg_rating`
+  - `"good"` if average rating is **above** `good_rating` (default: `7`)
+  - `"average"` if average rating is **above** `average_rating` but at or below `good_rating` (default: `4`)
+  - `"bad"` otherwise
+
+The `good_rating` and `average_rating` thresholds should be **optional arguments with defaults**, so the user can override them if needed.
+
+Here is an example of the expected output structure (values are illustrative):
+
+| Genre  | Year | avg_rating | total_votes | quality |
+|:------:|:----:|:----------:|:-----------:|:-------:|
+| Horror | 2011 | 7.1        | 104644      | good    |
+| Horror | 2010 | 6.2        | 529576      | average |
+| Horror | 2009 | 4.0        | 92455       | bad     |
+
+Your function should accept the same first three arguments as `single_actor_genre` (since you'll be calling it internally), plus the two threshold defaults.
+
+:::{.callout-tip}
+## Input validation for `col`
+
+For this function, `col` should only accept `Genre` or `Cast`. You can use `deparse(substitute(col))` to extract the column name as a string for validation purposes.
+:::
+
+```{r}
+# your function here
+```
+
+Test your function:
+
+```{r}
+yearly_info(movies_clean, Genre, "Horror") |> 
+  head(5) |> 
+  kable()
+```
+
+---
+
+## The Power of Functions
+
+**5. Build a combined dataset for three genres**
+
+Using `yearly_info`, create a single dataframe that contains yearly summary information for **Horror**, **Comedy**, and **Action** all together. You can name this dataframe whatever you like — just make sure you use that same name consistently in questions 6 and 7.
+
+In addition to the columns produced by `yearly_info`, also include for each year-genre combination:
+
+- The `Title` of the highest-rated movie that year (break ties by keeping just one)
+- That movie's `Duration` and `Rating`
+
+:::{.callout-tip}
+## Stacking results for multiple inputs
+
+Consider how you might apply `yearly_info` across a vector of genre names and combine the results into one dataframe. Functions like `map_dfr()` or `bind_rows()` may be useful.
+:::
+
+```{r}
+# your code here
+```
+
+Take a moment to appreciate how little repeated code was needed here compared to doing this without functions.
+
+---
+
+
+## Presenting Data Nicely
+
+**6. Make a polished summary table**
+
+Using the dataframe you created in question 5, create a clean, readable table. To keep things manageable, only include rows from **2010 onward**, filter out any rows where `Year` is missing, and show only the top 10 rows by average rating.
+
+Your table should:
+
+- Show only the most relevant columns (genre, year, summary stats, best movie info)
+- Have clean, human-readable column names — use `kable(col.names = ...)` to rename them rather than `rename()`
+- Round any numeric values to two decimal places
+- Include a descriptive caption
+
+```{r}
+# your code here
+```
+
+---
+
+**7. Visualize average rating over time by genre**
+
+Using the dataframe you created in question 5, create a line graph with `ggplot2` showing how the average yearly rating for each genre has changed over time.
+
+Your plot should:
+
+- Use `geom_line()` and `geom_point()` to show the trend
+- Use `color` to distinguish genres
+- Use `shape` on the points to reflect the `quality` label (`"good"`, `"average"`, `"bad"`)
+- Have a clear title, axis labels, and legend
+- Use a clean theme
+
+```{r}
+# your code here
+```
