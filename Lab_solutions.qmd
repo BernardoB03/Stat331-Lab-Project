@@ -100,7 +100,7 @@ single_actor_genre(movies_clean, Genre, "Horror") |>
   kable()
 ```
 
-**3. Adding input validation to our function**
+**3. Add input validation to the function you wrote in (2). You can copy and paste your code.**
 ```{r}
 
 single_actor_genre <- function(df, col, str) {
@@ -252,6 +252,54 @@ genre |>
   ) +
   theme_bw()
 ```
+
+## Statistical Analysis
+
+**8a. Using the same `genre` dataset, let's see whether there's a correlation between a movie's duration and its rating. Create a scatterplot of `Duration` vs `Rating` and include a linear regression line. Describe the scatterplot.**
+
+:::{.callout-tip}
+Don't worry about labels for this question.
+:::
+
+```{r}
+
+genre |> 
+  ggplot(aes(x = Duration, y = Rating)) +
+  geom_point(alpha = .8) +
+  geom_smooth(method = "lm") 
+
+```
+There is high variability when it comes to rating. Duration is mostly clustered around 100 minutes, so the relationship doesn't seem to be completely linear. The regression line is slightly upward sloping, suggesting a weak positive association between duration and rating could exist.
+
+**8b. Fit a simple linear regression model predicting Rating by Duration. Report the R-squared value and give a brief interpretation.**
+
+```{r}
+
+model <- lm(Rating ~ Duration, data = genre)
+
+summary(model)
+
+```
+The (multiple) R-squared value for this regression is 0.03746. This means that only 3.746% of the variance in rating can be explained by duration, which is very low.
+
+**8c. Now nest your regression by genre, and report which genre had the highest R-squared. What are possible limitations of the model we used? (hint: look at the number of rows for each genre!)**
+
+```{r}
+by_genre <- genre |> 
+  nest(genre_dat = -Genre) |> 
+  mutate(model2 = map(genre_dat, 
+                   ~ lm(Rating ~ Duration, data = .x)),
+         stats = map(model2, broom::glance)) |> 
+  select(Genre, stats) |>
+  unnest(stats) |>
+  select(Genre, r.squared)
+
+by_genre |> 
+  slice_max(r.squared) |> 
+    kable()
+```
+
+The 'Action' genre has the highest R-squared, at 0.2657681. A limitation of this model is the very small sample size, especially for each individual genre. The genre overall dataframe has only 116 observations, the "Action" genre only has 13 observations.
 
 ## References
 
