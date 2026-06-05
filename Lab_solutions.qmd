@@ -209,18 +209,16 @@ Using `genre` from question 5, create a clean readable table with `select()`, `r
 
 ```{r}
 three_genres |>
+  filter(Year >= 2010, !is.na(Year)) |>
   select(Genre, Year, avg_rating, total_votes, quality, Title, Duration, Rating) |>
-  rename(
-    `Avg Rating`     = avg_rating,
-    `Total Votes`    = total_votes,
-    Quality          = quality,
-    `Best Movie`     = Title,
-    `Duration (min)` = Duration,
-    `Movie Rating`   = Rating
-  ) |>
   arrange(Genre, Year) |>
-  mutate(`Avg Rating` = round(`Avg Rating`, 2)) |>
-  kable(caption = "Yearly Film Performance by Genre: Horror, Comedy, and Action")
+  mutate(avg_rating = round(avg_rating, 2)) |>
+  slice_max(avg_rating, n = 10) |>
+  kable(
+    caption   = "Yearly Film Performance by Genre (2010–present): Horror, Comedy, and Action",
+    col.names = c("Genre", "Year", "Avg Rating", "Total Votes",
+                  "Quality", "Best Movie", "Duration (min)", "Movie Rating")
+  )
 ```
 
 ---
@@ -232,7 +230,8 @@ Using `genre`, create a graph with `ggplot2` that shows how the average yearly r
 ```{r}
 #| fig-width: 10
 #| fig-height: 5
-genre |>
+three_genres |>
+  filter(!is.na(Year)) |>
   select(Genre, Year, avg_rating, quality) |>
   distinct() |>
   ggplot(aes(x = Year, y = avg_rating, color = Genre, group = Genre)) +
@@ -244,7 +243,7 @@ genre |>
   ) +
   scale_y_continuous(limits = c(0, 10), breaks = seq(0, 10, 2)) +
   labs(
-    title   = "Average IMDB Rating by Year",
+    title   = "Average IMDB Rating by Year and Genre",
     x       = "Year",
     y       = "Average Rating",
     color   = "Genre",
