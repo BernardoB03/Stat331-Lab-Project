@@ -14,6 +14,7 @@ execute:
   message: false
   warning: false
 ---
+
 ## Functions and Dataframes
 
 The goal of this lab is to get a solid handle on how to develop functions in hand with a dataframe. As doing so can greatly decrease the amount of repeated code needed to get similar output from looking through a dataframe multiple times at different points of time. Think about how you might have a dataframe of candy and you end with a table of chocolate candies with selected information, only to find out you have to make a similar table with hard candies instead. To make the same table twice but with one difference here would be a lot of repeated code. Luckily with a function that can be reduced to a single line in both cases along with the code to make the function.
@@ -21,6 +22,7 @@ The goal of this lab is to get a solid handle on how to develop functions in han
 The dataset we are using for this lab comes from [kaggle](https://www.kaggle.com/datasets/amanbarthwal/imdb-movies-data). The dataset has various information on 10,000 movies collected from *IMDB*. As such you can expect to find title, genre, and rating information from this dataset, along with some other information. Visit the link to get the whole data dictionary in order to find out what each column means, we will be using version two of the data. While the data is not overly complex it contains enough information to make a couple of functions that pull out or modify data in interesting ways.
 
 ## Setup
+
 ```{r}
 #load in libraries
 library(tidyverse)
@@ -38,15 +40,19 @@ movies <- read_csv("imdb-movies-dataset.csv")
 
 **1. Cleaning up our data to work with**
 
-Before we can begin working with this dataset, we need to clean it up. Looking at the movies dataset you may notice some missing values, duplicate entries, and columns that won't be useful for our analysis.
-Using one dplyr pipeline, clean the movies dataset by:
+Before we can begin working with this dataset, we need to tidy it up. The raw data contains missing values, duplicate entries, and columns we won't need.
 
-Removing any rows where Title, Genre, or Rating are missing
-Removing any duplicate movies based on Title
-Removing columns that will not be used Poster, Review Title, Review, and Description
+Using a single `dplyr` pipeline, create a cleaned dataset called `movies_clean` by:
 
-Assign your cleaned data to a new variable called movies_clean use this data going forward.
+- Removing any rows where `Title`, `Genre`, or `Rating` are missing
+- Removing duplicate movies, keeping only the first occurrence of each `Title`
+- Renaming `Duration (min)` to `Duration` (the space and parentheses will cause issues later)
+- Keeping only the columns: `Title`, `Year`, `Certificate`, `Duration`, `Genre`, `Rating`, `Cast`, `Director`, `Metascore`, `Votes`
+
+Use `movies_clean` for all questions going forward.
+
 ```{r}
+#Q1 Code
 movies_clean <- movies |>
   filter(
     !is.na(Title),
@@ -74,7 +80,7 @@ To help guide you in making this function you are taking 3 inputs.
 3. A character value 
 
 ```{r}
-#code your function
+#Q2 Code
 single_actor_genre <- function(df, col, str) {
   df |> 
     filter(str_detect(string = {{col}},
@@ -84,8 +90,10 @@ single_actor_genre <- function(df, col, str) {
 }
 ```
 
-Check your function
+Test your function
+
 ```{r}
+#function test
 #will likely have to change function name and input here to see if your code worked
 single_actor_genre(movies_clean, Genre, "Horror") |> 
   select(Title, Genre) |> 
@@ -94,8 +102,15 @@ single_actor_genre(movies_clean, Genre, "Horror") |>
 ```
 
 **3. Add input validation to the function you wrote in (2). You can copy and paste your code.**
-```{r}
 
+Rewrite the function to include checks that guard against bad inputs. Specifically, your function should stop with a clear error message if:
+
+- `df` is not a dataframe
+- `str` is not a character string
+- The column passed as `col` does not exist in `df`
+
+```{r}
+#Q3 Code
 single_actor_genre <- function(df, col, str) {
   stopifnot("`df` must be a dataframe." = is.data.frame(df))
   stopifnot("`str` must be a character string." = is.character(str))
@@ -140,14 +155,8 @@ Here is an example of what the output should look like
 The input of this function should be straightforward, since your using a helper function you need its input to be included in this function as well. Then you are just adding the default variables that where mentioned before.
 
 ```{r}
-
+#Q4 Code
 yearly_info <- function(df, col, str, good_rating = 7, average_rating = 4) {
-  #input validation
-  stopifnot("`df` must be a dataframe." = is.data.frame(df))
-  stopifnot("`str` must be a character string." = is.character(str))
-  stopifnot("`col` must be `Genre` or `Cast`." = str_detect(string = deparse(substitute(col)),pattern = "Genre|Cast"))
-  
-  #function
   df |> 
   single_actor_genre({{col}}, str) |> 
   group_by({{col}}, Year) |> 
@@ -160,9 +169,11 @@ yearly_info <- function(df, col, str, good_rating = 7, average_rating = 4) {
 
 ```
 
-**Test your function here**
+Test your function
+
 ```{r}
-#mess around with this code to make sure you getting error when providing things that arnt expected
+#test function
+#will likely have to change function name and input here to see if your code worked
 yearly_info(movies_clean, Genre, "Horror") |> 
   head(5) |> 
   kable()
@@ -174,9 +185,10 @@ As you might have noticed when writing your more complex function the true beaut
 
 **5. Make a table with yearly information on 3 genres**
 
-Using the more complex function you made, save a dataframe that contains yearly information on 3 genres. It should also contain the title of the highest rated movie of that year for each genre, its duration, its rating and votes.
+Using the more complex function you made, save a dataframe that contains yearly information on Horror, Comedy, and  Action. It should also contain the title of the highest rated movie of that year for each genre, its duration, its rating and votes.
 
 ```{r}
+#Q5 Code
 three_genres <- map_dfr(c("Horror", "Comedy", "Action"),~ yearly_info(movies_clean, Genre, .x)) |> 
   inner_join(movies_clean, by = c("Genre", "Year")) |> 
   group_by(Genre, Year) |> 
@@ -191,10 +203,17 @@ Take a moment to think about how many more lines of code would be needed if we d
 
 **6. Create a nicer looking table for the 3 genres**
 
-Using the dataframe from question 5, create a clean readable table with `select()`, `rename()`, `arrange()`, `mutate()`, and `kable()`. Clean up the column names, round numeric values, and arrange by genre and year.
+Using the dataframe you created in question 5, create a clean, readable table. To keep things manageable, only include rows from **2010 onward**, filter out any rows where `Year` is missing, and show only the top 10 rows by average rating.
 
+Your table should:
+
+- Show only the most relevant columns (genre, year, summary stats, best movie info)
+- Have clean, human-readable column names
+- Round any numeric values to two decimal places
+- Include a descriptive caption about the table
 
 ```{r}
+#Q6 Code
 three_genres |>
   filter(Year >= 2010, !is.na(Year)) |>
   select(Genre, Year, avg_rating, total_votes, quality, Title, Duration, Rating) |>
@@ -208,15 +227,21 @@ three_genres |>
   )
 ```
 
----
-
 **7. Create a graph based on the 3 genres**
 
-Using the dataframe from 5 and 6, create a graph with `ggplot2` that shows how the average yearly rating for each genre has changed over time. Use `geom_line()` and `geom_point()` to show the trend and `color` to distinguish the genres. Include clear axis labels and a title.
+Using the dataframe you created in question 5, create a clean readable line graph with `ggplot2` showing how the average yearly rating for each genre has changed over time.
+
+Your plot should:
+
+- Use `color` to distinguish genres
+- Use `shape` on the points to reflect the `quality` label (`"good"`, `"average"`, `"bad"`)
+- Have a clear title, axis labels, and legend
+- Use a clean theme
 
 ```{r}
 #| fig-width: 10
 #| fig-height: 5
+#Q7 Code
 three_genres |>
   filter(!is.na(Year)) |>
   select(Genre, Year, avg_rating, quality) |>
@@ -240,29 +265,32 @@ three_genres |>
 
 
 ```{r}
-
+#Q8a Code
 three_genres |> 
   ggplot(aes(x = Duration, y = Rating)) +
   geom_point(alpha = .8) +
   geom_smooth(method = "lm") 
 
 ```
+
 There is high variability when it comes to rating. Duration is mostly clustered around 100 minutes, so the relationship doesn't seem to be completely linear. The regression line is slightly upward sloping, suggesting a weak positive association between duration and rating could exist.
 
 **8b. Fit a simple linear regression model predicting Rating by Duration. Report the R-squared value and give a brief interpretation.**
 
 ```{r}
-
+#Q8b code
 model <- lm(Rating ~ Duration, data = three_genres)
 
 summary(model)
 
 ```
+
 The (multiple) R-squared value for this regression is 0.03746. This means that only 3.746% of the variance in rating can be explained by duration, which is very low.
 
 **8c. Now nest your regression by genre, and report which genre had the highest R-squared. What are possible limitations of the model we used? (hint: look at the number of rows for each genre!)**
 
 ```{r}
+#Q8c Code
 by_genre <- three_genres |> 
   nest(genre_dat = -Genre) |> 
   mutate(model2 = map(genre_dat, 

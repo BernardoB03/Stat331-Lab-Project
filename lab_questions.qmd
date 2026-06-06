@@ -16,18 +16,20 @@ execute:
 
 ## Functions and Dataframes
 
-The goal of this lab is to develop a solid handle on how to build functions that work alongside a dataframe. Functions are powerful because they eliminate repeated code. Imagine you have a dataframe of candy and you need a table showing only the chocolate candies — then your boss asks for the same table but for hard candies instead. Without a function, you'd copy and paste nearly identical code twice. With a function, each table is just a single line of code.
+The goal of this lab is to get a solid handle on how to develop functions in hand with a dataframe. As doing so can greatly decrease the amount of repeated code needed to get similar output from looking through a dataframe multiple times at different points of time. Think about how you might have a dataframe of candy and you end with a table of chocolate candies with selected information, only to find out you have to make a similar table with hard candies instead. To make the same table twice but with one difference here would be a lot of repeated code. Luckily with a function that can be reduced to a single line in both cases along with the code to make the function.
 
-The dataset we are using comes from [Kaggle](https://www.kaggle.com/datasets/amanbarthwal/imdb-movies-data). It contains information on 10,000 movies collected from *IMDB*, including title, genre, rating, cast, and more. Visit the link for the full data dictionary. We will be using version two of the data.
+The dataset we are using for this lab comes from [kaggle](https://www.kaggle.com/datasets/amanbarthwal/imdb-movies-data). The dataset has various information on 10,000 movies collected from *IMDB*. As such you can expect to find title, genre, and rating information from this dataset, along with some other information. Visit the link to get the whole data dictionary in order to find out what each column means, we will be using version two of the data. While the data is not overly complex it contains enough information to make a couple of functions that pull out or modify data in interesting ways.
 
 ## Setup
 
 ```{r}
+#load in libraries
 library(tidyverse)
 library(knitr)
 ```
 
 ```{r}
+#load in imdb-movies-dataset.csv
 movies <- read_csv("imdb-movies-dataset.csv")
 ```
 
@@ -49,74 +51,52 @@ Using a single `dplyr` pipeline, create a cleaned dataset called `movies_clean` 
 Use `movies_clean` for all questions going forward.
 
 ```{r}
-# your code here
-```
+#Q1 Code
 
----
+```
 
 ## Simple Functions
 
+Lets get into functions with a simple one
+
 **2. Write a function to filter a table by a specific actor or genre**
 
-Both the `Genre` and `Cast` columns contain comma-separated lists of values (e.g., `"Horror, Comedy"` or `"Tom Hanks, Robin Wright"`). Write a function called `single_actor_genre` that:
+Looking at the movies dataset it could be seen that both genre and cast contain a list of comma separated values, rather than only containing one value. For this function if we are given a specific actor or genre we should return the rows that contain that value, but with only the specified value given in the respective column. If given Horror as a genre then we should only return rows that contain Horror as a genre and mutate them to only contain Horror as a genre rather than something like "Horror, Comedy".
 
-1. Filters the dataframe to only rows where a given column **contains** a specified string
-2. Mutates that column so it shows **only** the matched value (not the full comma-separated list)
+To help guide you in making this function you are taking 3 inputs.
 
-For example, passing `"Horror"` as the genre should return rows that include Horror as a genre, with the `Genre` column showing only `"Horror"`.
-
-Your function should accept three arguments:
-
-1. `df` — a dataframe
-2. `col` — the column to search (e.g., `Genre` or `Cast`)
-3. `str` — the character value to search for
-
-:::{.callout-tip}
-## Working with dplyr inside functions
-
-When passing a column name into a function, use `{{ col }}` (curly-curly) for `dplyr` verbs. This is part of `rlang`'s tidy evaluation system.
-:::
+1. A dataframe
+2. A given column
+3. A character value 
 
 ```{r}
-# your function here
+#Q2 Code
+
 ```
 
-Check your function:
+Test your function
 
 ```{r}
+#function test
+#will likely have to change function name and input here to see if your code worked
 single_actor_genre(movies_clean, Genre, "Horror") |> 
   select(Title, Genre) |> 
   head(5) |> 
   kable()
 ```
 
----
-
 **3. Add input validation to your function**
 
-Rewrite `single_actor_genre` to include checks that guard against bad inputs. Specifically, your function should stop with a clear error message if:
+Rewrite the function to include checks that guard against bad inputs. Specifically, your function should stop with a clear error message if:
 
 - `df` is not a dataframe
 - `str` is not a character string
 - The column passed as `col` does not exist in `df`
 
-:::{.callout-tip}
-## Stopping with a message
-
-`stopifnot()` is a convenient way to validate inputs. You can supply a named argument where the name becomes the error message:
-
-```r
-stopifnot("my message" = some_condition)
-```
-
-To check whether a `col` argument (passed with `{{ }}`) is actually a column name in `df`, you may find `rlang::as_name()` and `rlang::ensym()` helpful for extracting the column name as a string.
-:::
-
 ```{r}
-# updated function with validation
-```
+#Q3 Code
 
----
+```
 
 ## More complex functions
 
@@ -143,12 +123,15 @@ Here is an example of what the output should look like
 The input of this function should be straightforward, since your using a helper function you need its input to be included in this function as well. Then you are just adding the default variables that where mentioned before.
 
 ```{r}
-# your function here
+#Q4 Code
+
 ```
 
-Test your function:
+Test your function
 
 ```{r}
+#function test
+#will likely have to change function name and input here to see if your code worked
 yearly_info(movies_clean, Genre, "Horror") |> 
   head(5) |> 
   kable()
@@ -162,7 +145,7 @@ As you might have noticed when writing your more complex function the true beaut
 
 **5. Make a table with yearly information on 3 genres**
 
-Using the more complex function you made, save a dataframe that contains yearly information on the 3 genres. It should also contain the title of the highest rated movie of that year for each genre, its duration, its rating and votes.
+Using the more complex function you made, save a dataframe that contains yearly information on Horror, Comedy, and Action. It should also contain the title of the highest rated movie of that year for each genre, its duration, its rating and votes.
 
 :::{.callout-tip}
 ## Expanding rows in a dataframe
@@ -172,13 +155,11 @@ It would be useful to look into functions that could help you **bind** rows toge
 :::
 
 ```{r}
-# your code here
+#Q5 Code
+
 ```
 
 Take a moment to appreciate how little repeated code was needed here compared to doing this without functions.
-
----
-
 
 ## Presenting Data Nicely
 
@@ -189,47 +170,48 @@ Using the dataframe you created in question 5, create a clean, readable table. T
 Your table should:
 
 - Show only the most relevant columns (genre, year, summary stats, best movie info)
-- Have clean, human-readable column names — use `kable(col.names = ...)` to rename them rather than `rename()`
+- Have clean, human-readable column names
 - Round any numeric values to two decimal places
-- Include a descriptive caption
+- Include a descriptive caption about the table
 
 ```{r}
-# your code here
-```
+#Q6 Code
 
----
+```
 
 **7. Visualize average rating over time by genre**
 
-Using the dataframe you created in question 5, create a line graph with `ggplot2` showing how the average yearly rating for each genre has changed over time.
+Using the dataframe you created in question 5, create a clean readable line graph with `ggplot2` showing how the average yearly rating for each genre has changed over time.
 
 Your plot should:
 
-- Use `geom_line()` and `geom_point()` to show the trend
 - Use `color` to distinguish genres
 - Use `shape` on the points to reflect the `quality` label (`"good"`, `"average"`, `"bad"`)
 - Have a clear title, axis labels, and legend
 - Use a clean theme
 
 ```{r}
-# your code here
+#Q7 Code
+
 ```
 
 ## Statistical Analysis
 
-**8a. Using the same `genre` dataset, let's see whether there's a correlation between a movie's duration and its rating. Create a scatterplot of `Duration` vs `Rating` and include a linear regression line. Describe the scatterplot.**
+**8a. Using the same dataset, let's see whether there's a correlation between a movie's duration and its rating. Create a scatterplot of `Duration` vs `Rating` and include a linear regression line. Describe the scatterplot.**
 
 :::{.callout-tip}
 Don't worry about labels for this question.
 :::
 
 ```{r}
+#Q8a Code
 
 ```
 
 **8b. Fit a simple linear regression model predicting Rating by Duration. Report the R-squared value and give a brief interpretation.**
 
 ```{r}
+#Q8b Code
 
 ```
 
@@ -237,6 +219,7 @@ Don't worry about labels for this question.
 **8c. Now nest your regression by genre, and report which genre had the highest R-squared. What are possible limitations of the model we used? (hint: look at the number of rows for each genre!)**
 
 ```{r}
+#Q8c Code
 
 ```
 
