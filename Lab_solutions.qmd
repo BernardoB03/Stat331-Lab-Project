@@ -73,13 +73,6 @@ To help guide you in making this function you are taking 3 inputs.
 2. A given column
 3. A character value 
 
-:::{.callout-tip}
-## Working with dplyr in functions
-
-Remember that when in a function it would be useful to use `rlang` in order to get tidy evaluation for a column passed to a function.
-
-:::
-
 ```{r}
 #code your function
 single_actor_genre <- function(df, col, str) {
@@ -183,13 +176,6 @@ As you might have noticed when writing your more complex function the true beaut
 
 Using the more complex function you made, save a dataframe that contains yearly information on 3 genres. It should also contain the title of the highest rated movie of that year for each genre, its duration, its rating and votes.
 
-:::{.callout-tip}
-## Expanding rows in a dataframe
-
-It would be useful to look into functions that could help you **bind** rows together or something like `map_dfr`
-
-:::
-
 ```{r}
 three_genres <- map_dfr(c("Horror", "Comedy", "Action"),~ yearly_info(movies_clean, Genre, .x)) |> 
   inner_join(movies_clean, by = c("Genre", "Year")) |> 
@@ -206,6 +192,7 @@ Take a moment to think about how many more lines of code would be needed if we d
 **6. Create a nicer looking table for the 3 genres**
 
 Using the dataframe from question 5, create a clean readable table with `select()`, `rename()`, `arrange()`, `mutate()`, and `kable()`. Clean up the column names, round numeric values, and arrange by genre and year.
+
 
 ```{r}
 three_genres |>
@@ -249,15 +236,12 @@ three_genres |>
 
 ## Statistical Analysis
 
-**8a. Using the same `genre` dataset, let's see whether there's a correlation between a movie's duration and its rating. Create a scatterplot of `Duration` vs `Rating` and include a linear regression line. Describe the scatterplot.**
+**8a. Using the same dataset, let's see whether there's a correlation between a movie's duration and its rating. Create a scatterplot of `Duration` vs `Rating` and include a linear regression line. Describe the scatterplot.**
 
-:::{.callout-tip}
-Don't worry about labels for this question.
-:::
 
 ```{r}
 
-genre |> 
+three_genres |> 
   ggplot(aes(x = Duration, y = Rating)) +
   geom_point(alpha = .8) +
   geom_smooth(method = "lm") 
@@ -269,7 +253,7 @@ There is high variability when it comes to rating. Duration is mostly clustered 
 
 ```{r}
 
-model <- lm(Rating ~ Duration, data = genre)
+model <- lm(Rating ~ Duration, data = three_genres)
 
 summary(model)
 
@@ -279,7 +263,7 @@ The (multiple) R-squared value for this regression is 0.03746. This means that o
 **8c. Now nest your regression by genre, and report which genre had the highest R-squared. What are possible limitations of the model we used? (hint: look at the number of rows for each genre!)**
 
 ```{r}
-by_genre <- genre |> 
+by_genre <- three_genres |> 
   nest(genre_dat = -Genre) |> 
   mutate(model2 = map(genre_dat, 
                    ~ lm(Rating ~ Duration, data = .x)),
